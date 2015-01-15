@@ -23,6 +23,10 @@ class FilterValidator
      */
     public function validateFilters(array &$filters)
     {
+
+        return true;
+
+        
         $filterConstraint = new Collection(array(
             'type' => array(
                 new NotBlank(),
