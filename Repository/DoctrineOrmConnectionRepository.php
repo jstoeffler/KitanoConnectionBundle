@@ -129,32 +129,26 @@ class DoctrineOrmConnectionRepository extends EntityRepository implements Connec
     /**
      * {@inheritDoc}
      */
-    public function areConnected(NodeInterface $nodeA, NodeInterface $nodeB, array $filters = array())
+    public function areConnected(NodeInterface $fromNode, NodeInterface $toNode, array $filters = array())
     {
-        $nodeAInformations = $this->extractMetadata($nodeA);
-        $nodeBInformations = $this->extractMetadata($nodeB);
+        $fromNodeInformation = $this->extractMetadata($fromNode);
+        $toNodeInformation = $this->extractMetadata($toNode);
 
         $queryBuilder = $this->createQueryBuilder('connection');
 
         $queryBuilder->select('COUNT (connection)')
             ->where(
-                $queryBuilder->expr()->orX(
-                    $queryBuilder->expr()->andX(
-                        $queryBuilder->expr()->andX("connection.sourceObjectId = :nodeAId", "connection.sourceObjectClass = :nodeAClass"),
-                        $queryBuilder->expr()->andX("connection.destinationObjectId = :nodeBId", "connection.destinationObjectClass = :nodeBClass")
-                    ),
-                    $queryBuilder->expr()->andX(
-                        $queryBuilder->expr()->andX("connection.sourceObjectId = :nodeBId", "connection.sourceObjectClass = :nodeBClass"),
-                        $queryBuilder->expr()->andX("connection.destinationObjectId = :nodeAId", "connection.destinationObjectClass = :nodeAClass")
-                    )
+                $queryBuilder->expr()->andX(
+                    $queryBuilder->expr()->andX("connection.sourceObjectId = :fromNodeId", "connection.sourceObjectClass = :fromNodeClass"),
+                    $queryBuilder->expr()->andX("connection.destinationObjectId = :toNodeId", "connection.destinationObjectClass = :toNodeClass")
                 )
             );
-        
+
         $queryBuilder->setParameters(array(
-            'nodeAClass' => $nodeAInformations['object_class'],
-            'nodeBClass' => $nodeBInformations['object_class'],
-            'nodeAId' => $nodeAInformations['object_id'],
-            'nodeBId' => $nodeBInformations['object_id'],
+            'fromNodeClass' => $fromNodeInformation['object_class'],
+            'toNodeClass' => $toNodeInformation['object_class'],
+            'fromNodeId' => $fromNodeInformation['object_id'],
+            'toNodeId' => $toNodeInformation['object_id'],
         ));
 
         if (array_key_exists('type', $filters)) {
